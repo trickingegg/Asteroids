@@ -16,7 +16,7 @@ GameObject:
   - component: {fileID: 3472254761477229700}
   - component: {fileID: 2821787147014691026}
   - component: {fileID: 4836855433728607011}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: AsteroidMedium
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -95,12 +95,13 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 5981007901858844215}
-  m_Enabled: 0
+  m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 4a68847aef58b414b8a00814b90a2881, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _largeExplosionSound: {fileID: 0}
+  _size: 1
+  _largeExplosionSound: {fileID: 8300000, guid: 0a84f55f618aeef41810df162679c5ab, type: 3}
   _asteroidPrefab: {fileID: 2774364475873832450, guid: 7294bfbd22080c54b90c653c4c779b46, type: 3}
 --- !u!58 &6889459135363889601
 CircleCollider2D:
@@ -112,7 +113,7 @@ CircleCollider2D:
   m_Enabled: 1
   m_Density: 1
   m_Material: {fileID: 0}
-  m_IsTrigger: 1
+  m_IsTrigger: 0
   m_UsedByEffector: 0
   m_UsedByComposite: 0
   m_Offset: {x: 0, y: 0}

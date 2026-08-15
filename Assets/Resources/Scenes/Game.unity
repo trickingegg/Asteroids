@@ -206,13 +206,13 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 637797759}
-        m_TargetAssemblyTypeName: 
-        m_MethodName: 
+      - m_Target: {fileID: 637797764}
+        m_TargetAssemblyTypeName: PauseMenu, Assembly-CSharp
+        m_MethodName: ToggleControls
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: 
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
           m_IntArgument: 0
           m_FloatArgument: 0
           m_StringArgument: 
@@ -766,8 +766,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   pauseMenuUI: {fileID: 1600715310}
-  Controlls1: {fileID: 0}
-  Controlls2: {fileID: 0}
+  continueButton: {fileID: 1920065525}
+  controlSchemeLabel: {fileID: 1326633540}
 --- !u!1 &824409417
 GameObject:
   m_ObjectHideFlags: 0
@@ -779,6 +779,7 @@ GameObject:
   - component: {fileID: 824409419}
   - component: {fileID: 824409418}
   - component: {fileID: 824409420}
+  - component: {fileID: 824409421}
   m_Layer: 0
   m_Name: AsteroidsSpawn
   m_TagString: Untagged
@@ -826,6 +827,21 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _asteroidPrefab: {fileID: 0}
+--- !u!114 &824409421
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 824409417}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0f7b4d5e1a2c7b9d2e3f4a5b6c7d8e9f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _saucerPrefab: {fileID: 4200000001, guid: 4d1f8b9c5e6a1f3b6c7d8e9f0a1b2c3d, type: 3}
+  _minDelay: 8
+  _maxDelay: 16
 --- !u!1 &883785728
 GameObject:
   m_ObjectHideFlags: 0
@@ -1797,7 +1813,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &1600715311
 RectTransform:
   m_ObjectHideFlags: 0
@@ -1891,10 +1907,19 @@ MonoBehaviour:
   pools:
   - name: AsteroidBig
     prefab: {fileID: 991997082106383177, guid: fb1f26606cc415c4587ea147b3efcf94, type: 3}
-    count: 3
+    count: 12
   - name: AsteroidMedium
     prefab: {fileID: 3472254761477229700, guid: 2bca6728b6fb1b445a99e02285ff7688, type: 3}
-    count: 3
+    count: 24
+  - name: AsteroidSmall
+    prefab: {fileID: 7488567396400960665, guid: 7294bfbd22080c54b90c653c4c779b46, type: 3}
+    count: 48
+  - name: Bullet
+    prefab: {fileID: 4100000007, guid: 3c0e7a8b4d5f0e2a5b6c7d8e9f0a1b2c, type: 3}
+    count: 8
+  - name: Saucer
+    prefab: {fileID: 4200000007, guid: 4d1f8b9c5e6a1f3b6c7d8e9f0a1b2c3d, type: 3}
+    count: 2
 --- !u!4 &1618538879
 Transform:
   m_ObjectHideFlags: 0

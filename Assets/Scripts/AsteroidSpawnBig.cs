@@ -1,28 +1,84 @@
-using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
 using Asteroids.Data;
-using Random = UnityEngine.Random;
+using UnityEngine;
 
 public class AsteroidSpawnBig : MonoBehaviour
 {
-    private const int numberOfObjects = 2;
-
     [SerializeField] private GameObject _asteroidPrefab;
+    [SerializeField] private float _nextWaveDelay = 1.5f;
+
+    private int _waveIndex;
+    private float _waveCooldown;
+    private bool _waitingForNextWave;
+
+    private void Awake()
+    {
+        Physics2D.gravity = Vector2.zero;
+        GameSession.Reset();
+    }
 
     private void Start()
     {
-        Spawner();
+        SpawnWave();
     }
-    private void Spawner()
+
+    private void Update()
     {
-        for (int i = 0; i < numberOfObjects; i++)
+        if (PauseMenu.Paused || GameSession.IsGameOver)
+            return;
+
+        if (Asteroid.AliveCount > 0 || Saucer.AliveCount > 0)
         {
-            var posX = Random.Range(0.0f, 1.0f);
-            var posY = Random.Range(0.0f, 1.0f);
-            Vector2 vec = Camera.main.ViewportToWorldPoint(new Vector2(posX,posY));
-            //Instantiate(_asteroidPrefab, vec, Quaternion.identity);
-            GameObject AsteroidBig = PoolManager.GetObject(_asteroidPrefab.name, vec);
+            _waitingForNextWave = false;
+            return;
+        }
+
+        if (!_waitingForNextWave)
+        {
+            _waitingForNextWave = true;
+            _waveCooldown = _nextWaveDelay;
+            return;
+        }
+
+        _waveCooldown -= Time.deltaTime;
+        if (_waveCooldown > 0f)
+            return;
+
+        _waveIndex++;
+        SpawnWave();
+        _waitingForNextWave = false;
+    }
+
+    private void SpawnWave()
+    {
+        if (_asteroidPrefab == null)
+            return;
+
+        CameraSpaceData.Refresh();
+        int count = GameRules.LargeAsteroidsForWave(_waveIndex);
+        for (int i = 0; i < count; i++)
+        {
+            Vector2 position = RandomEdgePosition();
+            PoolManager.GetObject(_asteroidPrefab.name, position);
+        }
+    }
+
+    private static Vector2 RandomEdgePosition()
+    {
+        float minX = CameraSpaceData.BottomLeft.x;
+        float maxX = CameraSpaceData.TopRight.x;
+        float minY = CameraSpaceData.BottomLeft.y;
+        float maxY = CameraSpaceData.TopRight.y;
+        int side = Random.Range(0, 4);
+        switch (side)
+        {
+            case 0:
+                return new Vector2(minX, Random.Range(minY, maxY));
+            case 1:
+                return new Vector2(maxX, Random.Range(minY, maxY));
+            case 2:
+                return new Vector2(Random.Range(minX, maxX), minY);
+            default:
+                return new Vector2(Random.Range(minX, maxX), maxY);
         }
     }
 }
