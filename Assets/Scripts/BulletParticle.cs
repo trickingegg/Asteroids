@@ -1,38 +1,57 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class BulletParticle : MonoBehaviour
 {
-    private const int _damage = 1;
-
-    private float _cooldown = 0.333f;
+    private float _cooldown = 0.18f;
     private float _timer;
     [SerializeField] private AudioClip _bulletSound;
     [SerializeField] private ParticleSystem _particleSystem;
+    [SerializeField] private GameObject _bulletPrefab;
 
-    //private readonly List<ParticleCollisionEvent> _collisionEvents = new List<ParticleCollisionEvent>();
     private void Awake()
     {
-        _timer = _cooldown;
+        _timer = 0f;
+        if (_particleSystem != null)
+        {
+            ParticleSystem.CollisionModule collision = _particleSystem.collision;
+            collision.enabled = false;
+        }
     }
+
     private void Update()
     {
+        if (PauseMenu.Paused || GameSession.IsGameOver)
+            return;
+
         _timer -= Time.deltaTime;
 
-        if (Input.GetKeyDown(KeyCode.Space) && _timer <= 0.0f)
-        {
-            AudioSource.PlayClipAtPoint(_bulletSound, transform.position);
-            _particleSystem.Play();
-            _timer = _cooldown;
-        }
-            
-    }
-    private void OnParticleCollision(GameObject other)
-    {
-        //var events = _particleSystem.GetCollisionEvents(other, _collisionEvents);
+        bool firePressed = Input.GetKeyDown(KeyCode.Space) || Input.GetKey(KeyCode.Space);
+        if (!firePressed || _timer > 0f)
+            return;
 
-        if (other.TryGetComponent(out Asteroid asteroid))
-            asteroid.Damage(_damage);
+        if (Bullet.PlayerBulletCount >= GameRules.MaxPlayerBullets)
+            return;
+
+        string bulletName = _bulletPrefab != null ? _bulletPrefab.name : "Bullet";
+
+        Transform ship = transform.parent != null ? transform.parent : transform;
+        Vector2 direction = ship.up;
+        Vector2 position = (Vector2)ship.position + direction * 0.45f;
+
+        GameObject bulletObject = PoolManager.GetObject(bulletName, position);
+        if (bulletObject == null)
+            return;
+
+        Bullet bullet = bulletObject.GetComponent<Bullet>();
+        if (bullet != null)
+            bullet.Launch(position, direction, true);
+
+        if (_bulletSound != null)
+            AudioSource.PlayClipAtPoint(_bulletSound, position);
+
+        if (_particleSystem != null)
+            _particleSystem.Play();
+
+        _timer = _cooldown;
     }
 }

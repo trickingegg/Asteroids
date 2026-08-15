@@ -1,30 +1,70 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class AsteroidMovement : MonoBehaviour
 {
     private Rigidbody2D _body;
-    public static Vector2 directionBig;
-    private Vector2 direction;
-    private float _speed;
-    void Start()
+    private bool _hasPresetLaunch;
+
+    public Vector2 Velocity
+    {
+        get
+        {
+            if (_body == null)
+                _body = GetComponent<Rigidbody2D>();
+            return _body != null ? _body.velocity : Vector2.zero;
+        }
+    }
+
+    public void SetLaunch(Vector2 direction, float speed)
+    {
+        if (_body == null)
+            _body = GetComponent<Rigidbody2D>();
+
+        _hasPresetLaunch = true;
+        ApplyLaunch(direction, speed);
+    }
+
+    private void OnEnable()
     {
         _body = GetComponent<Rigidbody2D>();
-        _speed = Random.Range(0.3f, 1.0f);
-        direction = Quaternion.AngleAxis(-45, Vector3.forward) * directionBig;
+        ConfigureBody();
+
+        if (_hasPresetLaunch)
+            return;
+
+        Asteroid asteroid = GetComponent<Asteroid>();
+        AsteroidSize size = asteroid != null ? asteroid.Size : AsteroidSize.Large;
+        float speed = Random.Range(GameRules.MinSpeed(size), GameRules.MaxSpeed(size));
+        Vector2 direction = Random.insideUnitCircle;
+        if (direction.sqrMagnitude < 0.01f)
+            direction = Vector2.right;
+        ApplyLaunch(direction, speed);
     }
 
-    // Update is called once per frame
-    void FixedUpdate()
+    private void OnDisable()
     {
-        Movement();
+        _hasPresetLaunch = false;
     }
 
-    private void Movement()
+    private void ConfigureBody()
     {
-        _body.AddRelativeForce(direction * Time.fixedDeltaTime, ForceMode2D.Impulse);
-        _body.velocity = Vector2.ClampMagnitude(_body.velocity, _speed);
-        Debug.Log("dir = " + direction);
+        if (_body == null)
+            return;
+
+        _body.gravityScale = 0f;
+        _body.bodyType = RigidbodyType2D.Kinematic;
+        _body.collisionDetectionMode = CollisionDetectionMode2D.Continuous;
+        _body.angularDrag = 0f;
+        _body.drag = 0f;
+    }
+
+    private void ApplyLaunch(Vector2 direction, float speed)
+    {
+        if (_body == null)
+            return;
+
+        Vector2 normalized = direction.sqrMagnitude > 0.0001f ? direction.normalized : Vector2.right;
+        _body.velocity = normalized * speed;
+        _body.angularVelocity = Random.Range(-80f, 80f);
     }
 }

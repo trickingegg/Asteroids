@@ -100,6 +100,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4a68847aef58b414b8a00814b90a2881, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _size: 0
   _largeExplosionSound: {fileID: 8300000, guid: 0a84f55f618aeef41810df162679c5ab, type: 3}
   _asteroidPrefab: {fileID: 5981007901858844215, guid: 2bca6728b6fb1b445a99e02285ff7688, type: 3}
 --- !u!58 &4222302736548285458
@@ -112,7 +113,7 @@ CircleCollider2D:
   m_Enabled: 1
   m_Density: 1
   m_Material: {fileID: 0}
-  m_IsTrigger: 0
+  m_IsTrigger: 1
   m_UsedByEffector: 0
   m_UsedByComposite: 0
   m_Offset: {x: 0, y: 0}
@@ -172,6 +173,6 @@ MonoBehaviour:
   m_GameObject: {fileID: 3136701025181796917}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 99d3c7a4eb7b74d43b9c48c49aa6ac79, type: 3}
+  m_Script: {fileID: 11500000, guid: ac0dadcfd72454d4998d08a0aab557b5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
