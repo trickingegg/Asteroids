@@ -28,6 +28,7 @@ public class Asteroid : MonoBehaviour
     {
         _dead = false;
         _aliveCount++;
+        GameSession.ApplyAsteroidCollisionSetup(gameObject);
     }
 
     private void OnDisable()

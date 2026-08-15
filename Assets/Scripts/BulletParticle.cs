@@ -1,3 +1,4 @@
+using Asteroids.Data;
 using UnityEngine;
 
 public class BulletParticle : MonoBehaviour
@@ -6,16 +7,47 @@ public class BulletParticle : MonoBehaviour
     private float _timer;
     [SerializeField] private AudioClip _bulletSound;
     [SerializeField] private ParticleSystem _particleSystem;
-    [SerializeField] private GameObject _bulletPrefab;
+
+    private ParticleSystem.Particle[] _wrapBuffer = new ParticleSystem.Particle[GameRules.MaxPlayerBullets];
 
     private void Awake()
     {
         _timer = 0f;
-        if (_particleSystem != null)
-        {
-            ParticleSystem.CollisionModule collision = _particleSystem.collision;
-            collision.enabled = false;
-        }
+        ConfigureParticleWeapon();
+    }
+
+    private void ConfigureParticleWeapon()
+    {
+        if (_particleSystem == null)
+            return;
+
+        ParticleSystem.MainModule main = _particleSystem.main;
+        main.simulationSpace = ParticleSystemSimulationSpace.World;
+        main.maxParticles = GameRules.MaxPlayerBullets;
+        main.startLifetime = GameRules.BulletLifetime;
+        main.startSpeed = 8f;
+        main.playOnAwake = false;
+        main.loop = false;
+        main.useUnscaledTime = false;
+
+        ParticleSystem.EmissionModule emission = _particleSystem.emission;
+        emission.rateOverTime = 0f;
+        emission.rateOverDistance = 0f;
+
+        ParticleSystem.CollisionModule collision = _particleSystem.collision;
+        collision.enabled = true;
+        collision.type = ParticleSystemCollisionType.World;
+        collision.mode = ParticleSystemCollisionMode.Collision2D;
+        collision.sendCollisionMessages = true;
+        collision.enableDynamicColliders = true;
+        collision.radiusScale = 0.6f;
+        collision.lifetimeLoss = 1f;
+        collision.bounce = 0f;
+        collision.dampen = 0f;
+        collision.colliderForce = 0f;
+        collision.maxCollisionShapes = 256;
+        collision.quality = ParticleSystemCollisionQuality.High;
+        collision.collidesWith = Physics2D.DefaultRaycastLayers;
     }
 
     private void Update()
@@ -25,33 +57,68 @@ public class BulletParticle : MonoBehaviour
 
         _timer -= Time.deltaTime;
 
-        bool firePressed = Input.GetKeyDown(KeyCode.Space) || Input.GetKey(KeyCode.Space);
+        bool firePressed = Input.GetKey(KeyCode.Space);
         if (!firePressed || _timer > 0f)
             return;
 
-        if (Bullet.PlayerBulletCount >= GameRules.MaxPlayerBullets)
+        if (_particleSystem == null)
             return;
 
-        string bulletName = _bulletPrefab != null ? _bulletPrefab.name : "Bullet";
-
-        Transform ship = transform.parent != null ? transform.parent : transform;
-        Vector2 direction = ship.up;
-        Vector2 position = (Vector2)ship.position + direction * 0.45f;
-
-        GameObject bulletObject = PoolManager.GetObject(bulletName, position);
-        if (bulletObject == null)
+        if (_particleSystem.particleCount >= GameRules.MaxPlayerBullets)
             return;
 
-        Bullet bullet = bulletObject.GetComponent<Bullet>();
-        if (bullet != null)
-            bullet.Launch(position, direction, true);
+        _particleSystem.Emit(1);
 
         if (_bulletSound != null)
-            AudioSource.PlayClipAtPoint(_bulletSound, position);
-
-        if (_particleSystem != null)
-            _particleSystem.Play();
+            AudioSource.PlayClipAtPoint(_bulletSound, transform.position);
 
         _timer = _cooldown;
+    }
+
+    private void LateUpdate()
+    {
+        WrapParticles();
+    }
+
+    private void WrapParticles()
+    {
+        if (_particleSystem == null || _particleSystem.particleCount == 0)
+            return;
+
+        CameraSpaceData.Refresh();
+        int count = _particleSystem.GetParticles(_wrapBuffer);
+        bool changed = false;
+        for (int i = 0; i < count; i++)
+        {
+            Vector3 position = _wrapBuffer[i].position;
+            float x = position.x;
+            float y = position.y;
+            GameRules.Wrap(ref x, ref y, CameraSpaceData.BottomLeft.x, CameraSpaceData.BottomLeft.y,
+                CameraSpaceData.TopRight.x, CameraSpaceData.TopRight.y);
+            if (!Mathf.Approximately(x, position.x) || !Mathf.Approximately(y, position.y))
+            {
+                position.x = x;
+                position.y = y;
+                _wrapBuffer[i].position = position;
+                changed = true;
+            }
+        }
+
+        if (changed)
+            _particleSystem.SetParticles(_wrapBuffer, count);
+    }
+
+    private void OnParticleCollision(GameObject other)
+    {
+        Asteroid asteroid = other.GetComponent<Asteroid>();
+        if (asteroid != null)
+        {
+            asteroid.Damage(1f);
+            return;
+        }
+
+        Saucer saucer = other.GetComponent<Saucer>();
+        if (saucer != null)
+            saucer.Hit();
     }
 }

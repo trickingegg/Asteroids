@@ -52,10 +52,11 @@ public class AsteroidMovement : MonoBehaviour
             return;
 
         _body.gravityScale = 0f;
-        _body.bodyType = RigidbodyType2D.Kinematic;
+        _body.bodyType = RigidbodyType2D.Dynamic;
         _body.collisionDetectionMode = CollisionDetectionMode2D.Continuous;
         _body.angularDrag = 0f;
         _body.drag = 0f;
+        _body.constraints = RigidbodyConstraints2D.None;
     }
 
     private void ApplyLaunch(Vector2 direction, float speed)
@@ -66,5 +67,6 @@ public class AsteroidMovement : MonoBehaviour
         Vector2 normalized = direction.sqrMagnitude > 0.0001f ? direction.normalized : Vector2.right;
         _body.velocity = normalized * speed;
         _body.angularVelocity = Random.Range(-80f, 80f);
+        _body.WakeUp();
     }
 }

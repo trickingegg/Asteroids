@@ -41,9 +41,14 @@ public class Saucer : MonoBehaviour
         _body = GetComponent<Rigidbody2D>();
         if (_body != null)
         {
-            _body.bodyType = RigidbodyType2D.Kinematic;
+            _body.bodyType = RigidbodyType2D.Dynamic;
             _body.gravityScale = 0f;
         }
+
+        Collider2D collider = GetComponent<Collider2D>();
+        if (collider != null)
+            collider.isTrigger = false;
+
         _fireTimer = _fireInterval;
         _steerTimer = 0f;
     }
@@ -88,12 +93,24 @@ public class Saucer : MonoBehaviour
 
     private void OnTriggerEnter2D(Collider2D other)
     {
-        Asteroid asteroid = other.GetComponent<Asteroid>();
-        if (asteroid != null)
-        {
-            asteroid.DestroySilent();
-            Hit();
-        }
+        HandleAsteroidContact(other.GetComponent<Asteroid>());
+    }
+
+    private void OnCollisionEnter2D(Collision2D collision)
+    {
+        if (collision == null || collision.collider == null)
+            return;
+
+        HandleAsteroidContact(collision.collider.GetComponent<Asteroid>());
+    }
+
+    private void HandleAsteroidContact(Asteroid asteroid)
+    {
+        if (asteroid == null)
+            return;
+
+        asteroid.DestroySilent();
+        Hit();
     }
 
     private void Steer()
