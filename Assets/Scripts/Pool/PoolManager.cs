@@ -18,16 +18,18 @@ public static class PoolManager
 
 	public static void Initialize(PoolPart[] newPools)
 	{
-		pools = newPools; //заполняем информацию
+		if (objectsParent != null)
+			Object.Destroy(objectsParent);
+
+		pools = newPools;
 		objectsParent = new GameObject();
-		objectsParent.name = "Pool"; //создаем на сцене объект Pool, чтобы не заслонять иерархию
+		objectsParent.name = "Pool";
 		for (int i = 0; i < pools.Length; i++)
 		{
 			if (pools[i].prefab != null)
 			{
-				pools[i].ferula = new ObjectPooling(); //создаем свой пул для каждого префаба
+				pools[i].ferula = new ObjectPooling();
 				pools[i].ferula.Initialize(pools[i].count, pools[i].prefab, objectsParent.transform);
-				//инициализируем пул заданным количество объектов
 			}
 		}
 	}

@@ -4,6 +4,7 @@ using UnityEngine;
 public static class GameSession
 {
     public const string AsteroidLayerName = "Asteroid";
+    public const string GameSceneName = "Game";
 
     public static bool IsGameOver { get; private set; }
 

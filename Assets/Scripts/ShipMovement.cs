@@ -20,6 +20,7 @@ public class ShipMovement : MonoBehaviour
             _body.gravityScale = 0f;
             _body.drag = 0f;
         }
+        ApplyControlScheme();
     }
 
     private void Update()
@@ -28,7 +29,10 @@ public class ShipMovement : MonoBehaviour
             return;
 
         _hyperspaceCooldown -= Time.deltaTime;
-        Rotate();
+        if (GameSettings.UseMouseAim)
+            AimAtMouse();
+        else
+            Rotate();
         if (Input.GetKeyDown(KeyCode.LeftShift) || Input.GetKeyDown(KeyCode.DownArrow)
             || Input.GetKeyDown(KeyCode.S) || Input.GetKeyDown(KeyCode.H))
         {
@@ -50,6 +54,13 @@ public class ShipMovement : MonoBehaviour
         _body.velocity = Vector2.ClampMagnitude(_body.velocity, _maxSpeed);
     }
 
+    public void ApplyControlScheme()
+    {
+        ShipMovementMouse mouseMovement = GetComponent<ShipMovementMouse>();
+        if (mouseMovement != null)
+            mouseMovement.enabled = false;
+    }
+
     private void Rotate()
     {
         float rotation = Input.GetAxisRaw("Horizontal");
@@ -57,6 +68,23 @@ public class ShipMovement : MonoBehaviour
             return;
 
         transform.Rotate(0f, 0f, -rotation * _rotSpeed * Time.deltaTime);
+    }
+
+    private void AimAtMouse()
+    {
+        Camera camera = Camera.main;
+        if (camera == null)
+            return;
+
+        Vector3 mouseScreen = Input.mousePosition;
+        mouseScreen.z = Mathf.Abs(camera.transform.position.z);
+        Vector3 mouseWorld = camera.ScreenToWorldPoint(mouseScreen);
+        Vector2 diff = (Vector2)mouseWorld - (Vector2)transform.position;
+        if (diff.sqrMagnitude < 0.0001f)
+            return;
+
+        float angle = Mathf.Atan2(diff.y, diff.x) * Mathf.Rad2Deg + offset;
+        transform.rotation = Quaternion.Euler(0f, 0f, angle);
     }
 
     private void TryHyperspace()

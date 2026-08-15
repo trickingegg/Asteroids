@@ -4,11 +4,23 @@ using UnityEngine.SceneManagement;
 public class PauseMenu : MonoBehaviour
 {
     public static bool Paused = false;
-    public static bool Controlls = true;
+
     [SerializeField] private GameObject pauseMenuUI;
-    [SerializeField] private GameObject Controlls1;
-    [SerializeField] private GameObject Controlls2;
     [SerializeField] private GameObject continueButton;
+    [SerializeField] private TMPro.TextMeshProUGUI controlSchemeLabel;
+
+    private void Awake()
+    {
+        HideOverlay();
+        RefreshControlLabel();
+    }
+
+    private void Start()
+    {
+        HideOverlay();
+        ApplyControlSchemeToPlayer();
+        RefreshControlLabel();
+    }
 
     private void Update()
     {
@@ -29,22 +41,22 @@ public class PauseMenu : MonoBehaviour
         if (GameSession.IsGameOver)
             return;
 
-        if (continueButton != null)
-            continueButton.SetActive(true);
-        if (pauseMenuUI != null)
-            pauseMenuUI.SetActive(false);
+        HideOverlay();
         Time.timeScale = 1f;
         Paused = false;
     }
 
-    private void Pause()
+    public void NewGame()
     {
-        if (continueButton != null)
-            continueButton.SetActive(true);
-        if (pauseMenuUI != null)
-            pauseMenuUI.SetActive(true);
-        Time.timeScale = 0f;
-        Paused = true;
+        GameSession.Reset();
+        SceneManager.LoadScene(GameSession.GameSceneName);
+    }
+
+    public void ToggleControls()
+    {
+        GameSettings.ToggleMouseAim();
+        RefreshControlLabel();
+        ApplyControlSchemeToPlayer();
     }
 
     public void ShowGameOver()
@@ -57,39 +69,41 @@ public class PauseMenu : MonoBehaviour
         Paused = true;
     }
 
-    public void NewGame()
+    public void Quit()
     {
         GameSession.Reset();
-        SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
-        Time.timeScale = 1f;
-        Paused = false;
+        SceneManager.LoadScene(MainMenu.SceneName);
     }
 
-    private void ControllsChange()
+    private void Pause()
     {
-        if (Controlls)
-        {
-            if (Controlls1 != null)
-                Controlls1.SetActive(true);
-            if (Controlls2 != null)
-                Controlls2.SetActive(false);
-            Controlls = false;
-        }
-        else
-        {
-            if (Controlls1 != null)
-                Controlls1.SetActive(false);
-            if (Controlls2 != null)
-                Controlls2.SetActive(true);
-            Controlls = true;
-        }
-
+        if (continueButton != null)
+            continueButton.SetActive(true);
+        if (pauseMenuUI != null)
+            pauseMenuUI.SetActive(true);
+        RefreshControlLabel();
         Time.timeScale = 0f;
         Paused = true;
     }
 
-    public void Quit()
+    private void HideOverlay()
     {
-        Application.Quit();
+        if (pauseMenuUI != null)
+            pauseMenuUI.SetActive(false);
+        if (continueButton != null)
+            continueButton.SetActive(true);
+    }
+
+    private void RefreshControlLabel()
+    {
+        if (controlSchemeLabel != null)
+            controlSchemeLabel.text = GameSettings.ControlSchemeLabel();
+    }
+
+    private static void ApplyControlSchemeToPlayer()
+    {
+        ShipMovement movement = Object.FindObjectOfType<ShipMovement>();
+        if (movement != null)
+            movement.ApplyControlScheme();
     }
 }

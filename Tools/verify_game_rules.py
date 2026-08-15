@@ -109,7 +109,12 @@ def main():
     x, y = wrap(-5.2, -4.3, -5, -4, 5, 4)
     ok(almost(x, 4.8) and almost(y, 3.7), "corner wrap")
 
-    ok("TryGetChildSize" in source, "split helper exists")
+    ok("path: Assets/Resources/Scenes/MainMenu.unity" in open(os.path.join(ROOT, "ProjectSettings", "EditorBuildSettings.asset")).read(), "MainMenu in build")
+    game_scene = open(os.path.join(ROOT, "Assets", "Resources", "Scenes", "Game.unity")).read()
+    ok('m_Name: PauseMenu' in game_scene and 'm_IsActive: 0' in game_scene, "pause overlay starts hidden")
+    main_menu = open(os.path.join(ROOT, "Assets", "Resources", "Scenes", "MainMenu.unity")).read()
+    ok("m_MethodName: ToggleControls" in main_menu, "main menu controls wired")
+    ok("m_MethodName: ToggleControls" in game_scene, "pause controls wired")
     ok("AsteroidSize.Medium" in source and "AsteroidSize.Small" in source, "split sizes exist")
 
     print("Passed: %s, Failed: %s" % (passed, failed))
